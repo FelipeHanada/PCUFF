@@ -1,0 +1,95 @@
+[ TEMA: PREFIX SUM ]
+
+[ MOTIVAÇÃO ] Offline Range Sum Queries
+	Dada uma sequência de inteiros A com n elementos e Q perguntas do formato (l, r)
+	Responda, para cada pergunta, a soma de todos os elementos A[l]+...+A[r]
+
+[ SOLUÇÃO ]
+	Defina um array prefix[i] tal que prefix[i] = soma de todos os elementos até i
+	A soma do intervalo [l, r] se torna, simplesmente: prefix[r] - prefix[l-1]
+
+	prefix[] pode ser computada em O(n)
+	e cada query pode ser respondida em O(1)
+
+
+[ PROBLEMA ] https://judge.yosupo.jp/problem/static_range_sum
+
+[ PROBLEMA ] https://cses.fi/problemset/task/1662/
+
+[ DESAFIO ] https://codeforces.com/contest/1398/problem/C
+
+[ PENSAR ] Só é possível usar arrays de prefixo com soma?
+	-> podemos fazer com multiplicação?
+	-> xor?
+	-> and?
+	-> max? (maior valor no intervalo)
+
+--------------------------------------------------------------------------------------------------------
+
+[ TEMA: PREFIX SUM 2D ]
+
+Vamos generalizar a técnica de prefix sum para mais dimensões
+
+[ MOTIVAÇÃO ] Offline Range Sum Queries
+	Dada uma grid de inteiros G com n linhas e m colunas
+		e Q perguntas do formato (x1, y1, x2, y2)
+	Responda, para cada pergunta, a soma de todos os elementos contidos
+		no retangulo (x1, y1, x2, y2)
+
+[ SOLUÇÃO ]
+	Defina uma grid prefix[i][j] tal que prefix[i][j] = soma do retângulo (1, 1, i, j)
+	A soma do retangulo (x1, y1, x2, y2) passa a ser:
+		prefix[x2][y2] - prefix[x2][y1-1] - prefix[x1-1][y2] + prefix[x1-1][y1-1]
+		(note o principio de inclusão-exclusão, ele é essencial para entender a técnica)
+
+	Podemos computar prefix[i][j] em O(nm) pela relação:
+		prefix[i][j] = prefix[i][j-1] + prefix[i-1][j] - prefix[i-1][j-1] + G[i][j]
+		(note, novamente, o principio de inclusão-exclusão)
+	
+	ATENÇÃO: Você precisa garantir que prefix[i][j-1], prefix[i-1][j] e prefix[i-1][j-1]
+		já estejam calculados antes de computar prefix[i][j]
+
+	Após isso, podemos responder toda query em O(1)
+
+--------------------------------------------------------------------------------------------------------
+
+[ TEMA: DIFFERENCE ARRAYS ]
+
+Difference arrays é uma técnica com princípio muito semelhante à prefix sums.
+
+[ MOTIVAÇÃO ]
+	Dado um conjunto de intervalos fechados I = { (l1, r1), (l2, r2), ..., (ln, rn) }
+		e Q perguntas do formato x
+	Responda, para cada pergunta, quantos intervalos de I contém x
+
+[ SOLUÇÃO ]
+	Defina um array diff que vai do menor valor de x até o maior valor de x
+	vamos construir diff de forma que diff[x] = quantidade de intervalos que contem x
+
+	para cada intervalo (l, r), precisamos incrementar o intervalo (l, r) em diff
+	
+	para tal, inicializamos um array auxiliar A zerado.
+	para cada intervalo, incrementamos A[l] e decrementamos A[r+1]
+	depois, computamos diff como o array de prefix sum de A.
+
+	o valor de diff[i] = quantidade de intervalos começados até i
+				- quantidade de intervalos encerrados até i
+	
+	portanto, diff[i] é a quantidade de intervalos começados antes de i
+			mas não finalizados.
+
+[ PROBLEMA ] https://atcoder.jp/contests/abc408/tasks/abc408_c
+
+--------------------------------------------------------------------------------------------------------
+
+[ REFERÊNCIAS ]
+
+Prefix Sums:
+	https://usaco.guide/silver/prefix-sums
+	https://usaco.guide/silver/more-prefix-sums
+
+Difference Arrays:
+	https://usaco.guide/silver/more-prefix-sums
+	https://codeforces.com/blog/entry/78762
+
+

@@ -1,0 +1,121 @@
+[ TEMA: Brute Force - permutações ]
+
+Vamos resolver problemas que envolvem buscar sobre o espaço de permutações de uma sequência A.
+
+Seja A uma sequência de tamanho n e P(A) o conjunto de todas as permutações de A.
+Temos que |P(A)| = n!
+
+Se processamos uma permutação P em O(f(P)), então nosso algoritmo tem complexidade O(maxf(P) n!).
+
+n! pode estourar muito facilmente.
+0! = 1
+1! = 1
+2! = 2
+3! = 6
+4! = 12
+5! = 60
+6! = 360
+7! = 5040
+8! = 40320
+9! = 362880 --> começa a se tornar inviável (para 1 segundo), mesmo se processarmos em O(n)
+10! = 3628800 --> começa a se tornar inviável (para 1 segundo), mesmo se processarmos em O(1)
+11! = 39916800
+12! = 479001600
+13! = 6227020800
+
+
+Portanto, a técnica pode ser SOMENTE aplicada em permutações de poucos elementos (idealmente, até 8).
+
+[ PROBLEMA ]: https://usaco.org/index.php?page=viewproblem2&cpid=965
+
+--------------------------------------------------------------------------------------------------------
+
+[ TEMA: Brute Force - subsets com bitwise ]
+
+Operações bitwise (refira à documentação da sua linguagem): 
+	OR (|)		101(5) | 011(3) = 111(7)
+	AND (&)		101(5) & 011(3) = 001(1)
+	XOR (^)		101(5) ^ 011(3) = 110(6)
+	RSHIFT (>>)	101(5) >> 1     = 10(2)
+		*faz o efeito de dividir por 2
+	LSHIFT (<<)	101(5) << 1     = 1010(10)
+		*faz o efeito de multiplicar por 2
+
+Para uma sequência A = [a_i] de tamanho n,
+	todo subconjunto de A possui uma sequência binária correspondente
+
+Seja S um subconjunto de A, vamos construir uma seq. bin. B = [b_i] de tamanho n da seguinte forma
+	b_i = 1		se a_i \in S
+	b_i = 0		caso contrário
+
+Então, para A = [1, 2, 3] e o subconjunto S = [1, 3], temos B = 101
+
+
+Dessa forma, iterar sobre todas as sequências binárias de tamanho n
+	é equivalente à iterar sobre todos os subconjuntos
+
+Todas as sequências binárias de tamanho n estão contidas no intervalo [0, 2^n), então podemos fazer algo como:
+for (int mask = 0; mask < (1<<n); mask++) {
+	// 1 << n é igual à 2^n (tente imaginar o porque!)
+	// mask é um inteiro cuja representação binária é o nosso subconjunto
+}
+
+Agora precisamos ter alguma forma de consultar o i-ésimo bit de mask para saber se o i-ésimo elemento da sequência
+	está no subconjunto atual.
+para isso, podemos aplica uma mascara:
+	para extrair o 3-ésimo bit da sequência 1101, podemos fazer o AND com o binário 0100
+	no final, teremos 0100 se o 3-ésimo bit for 1 (que é o caso)
+			e 0000 se for 0
+	além disso, podemos avaliar o inteiro reusltante como um booleano (em c++, inteiros != 0 são true e inteiros = 0 são false)
+
+portanto, temos a expressão: bool(mask & (1 << i))
+	ou só mask & (1 << i) --> o c++ faz o casting automático
+
+
+Vamos resolver a questão de quinta passada usando bitmasks:
+[ PROBLEMA ] https://cses.fi/problemset/task/1623
+
+
+
+[ PENSAR ] int's (em c++) utilizam 4 bytes (32 bits), existe o risco de faltarem bits na hora de utilizarmos essa técnica?
+		e long's (64 bits)?
+
+		bitset
+
+--------------------------------------------------------------------------------------------------------
+
+[ TEMA: Brute Force - meet in the middle ]
+
+Agora vamos estudar uma ténica de brute force mais refinada.
+
+Meet in the middle é uma técnica utilizada para resolver problemas de subconjuntos eficientemente
+	quando podemos DIVIDIR ao meio a sequência inicial.
+
+Isso permite subir a nossa restrição n até ~40 (ao invés dos ~20, discutidos anteriormente).
+
+[ PROBLEMA ] https://cses.fi/problemset/task/1628/
+[ SOLUÇÃO ]
+	n ~ 40, portanto, não conseguimos rodar um brute force em subsets convencional
+		complexidade O(2^n) => TLE...
+
+	precisamos perceber o seguinte:
+	Seja L e R as sequências de A divididas ao meio
+	-> |L| ~ |R| ~ n/2
+	-> todo subconjunto de A pode é formado pela união de um subconjunto de L com um subconjunto de R
+	-> a quantidade de subconjuntos de L é da ordem de 2^20 ~ 1e6	
+
+	assim, podemos computar a quantidade de subconjuntos de L que somam y em O(2^(n/2))
+
+	depois, podemos iterar sobre os conjuntos de R, 
+		verificando se podemos juntar com subconjuntos de L para somar a quantidade alvo.
+
+	Isso resulta em uma complexidade final de O(2^(n/2)log(2^(n/2))) ao invés do nosso O(2^n) inocente.
+
+
+--------------------------------------------------------------------------------------------------------
+
+[ REFERÊNCIAS ]
+
+https://cses.fi/book/book.pdf (Capítulo 5)
+https://usaco.guide/gold/meet-in-the-middle
+
